@@ -1,0 +1,6 @@
+title: Hydropower Control Notes
+description: Analytical notes on nonlinear hydropower dynamics, acausal modeling, FCR, droop control, AGC, and hybrid systems.
+theme: minima
+markdown: kramdown
+kramdown:
+  math_engine: mathjax
