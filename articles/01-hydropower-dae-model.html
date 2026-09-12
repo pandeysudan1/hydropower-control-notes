@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nonlinear Hydropower DAE Model</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;line-height:1.65;background:#fff;color:#111}
+    header{border-bottom:1px solid #ddd;padding:1rem 1.2rem;position:sticky;top:0;background:#fff;z-index:2}
+    header a{text-decoration:none;color:#111;font-weight:700;font-size:1.15rem}
+    main{max-width:900px;margin:auto;padding:2rem 1.25rem 5rem}
+    h1{font-size:clamp(2rem,7vw,3.4rem);line-height:1.1;margin:.5rem 0 1.4rem}
+    h2{margin-top:2.6rem;font-size:1.75rem;line-height:1.25}
+    p,li{font-size:1.05rem}
+    .eq{overflow-x:auto;overflow-y:hidden;padding:.35rem 0}
+    mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;padding:.4rem 0}
+    .note{border-left:4px solid #777;padding:.8rem 1rem;background:#f6f6f6}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    @media(prefers-color-scheme:dark){body,header{background:#111;color:#eee}header{border-color:#333}header a{color:#eee}.note{background:#1c1c1c}}
+  </style>
+  <script>
+    window.MathJax={
+      tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],processEscapes:true,tags:'ams'},
+      svg:{fontCache:'global'}
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<header><a href="../">Hydropower Control Notes</a></header>
+<main>
+<h1>Nonlinear Hydropower DAE Model</h1>
+<p>This note develops a compact nonlinear differential-algebraic model of a hydropower plant, starting from the reservoir and waterways and ending at the turbine, shaft, generator, electrical network, and load. The objective is to obtain a physically interpretable nonlinear model that can later be linearized around an operating point for load-frequency control and FCR studies.</p>
+
+<h2>1. Physical system and assumptions</h2>
+<p>We consider the chain</p>
+<div class="eq">\[\text{reservoir}\rightarrow\text{intake conduit}\rightarrow\text{surge tank}\rightarrow\text{penstock}\rightarrow\text{turbine}\rightarrow\text{shaft}\rightarrow\text{generator}\rightarrow\text{grid/load}.\]</div>
+<p>The reservoir and tailrace are treated as constant-head boundaries, the waterways are represented by lumped momentum equations with nonlinear friction, the surge tank introduces storage, the turbine is algebraic, the shaft provides rotational dynamics, and the simplified generator/network model is algebraic.</p>
+
+<h2>2. Differential and algebraic variables</h2>
+<p>A convenient differential-state vector is</p>
+<div class="eq">\[x=\begin{bmatrix}Q_1 & h_s & Q_2 & \delta & \omega\end{bmatrix}^{T}.\]</div>
+<p>Here, \(Q_1\) is the upstream conduit flow, \(h_s\) the surge-tank level, \(Q_2\) the downstream penstock/turbine flow, \(\delta\) the rotor angle, and \(\omega\) the angular speed.</p>
+<p>A possible algebraic vector is</p>
+<div class="eq">\[z=\begin{bmatrix}H_t & P_h & P_m & T_m & P_e & P_L\end{bmatrix}^{T},\]</div>
+<p>with external or control inputs</p>
+<div class="eq">\[u=\begin{bmatrix}y_g & H_r & H_{tr} & P_{\mathrm{grid}}\end{bmatrix}^{T}.\]</div>
+
+<h2>3. Reservoir and tailrace boundaries</h2>
+<div class="eq">\[H_r=H_{r0},\qquad H_{tr}=H_{tr0}.\]</div>
+<p>These are algebraic boundary conditions and introduce no dynamic states.</p>
+
+<h2>4. Upstream conduit dynamics</h2>
+<p>For a lumped water column, the momentum balance is</p>
+<div class="eq">\[L_1\dot Q_1=gA_1\left(H_r-h_s-h_{f,1}(Q_1)\right).\]</div>
+<p>With quadratic friction,</p>
+<div class="eq">\[h_{f,1}(Q_1)=K_1Q_1|Q_1|,\]</div>
+<p>so</p>
+<div class="eq">\[\boxed{\dot Q_1=\frac{gA_1}{L_1}\left(H_r-h_s-K_1Q_1|Q_1|\right)}.\]</div>
+
+<h2>5. Surge-tank dynamics</h2>
+<p>Continuity gives</p>
+<div class="eq">\[A_s\dot h_s=Q_1-Q_2,\]</div>
+<p>therefore</p>
+<div class="eq">\[\boxed{\dot h_s=\frac{Q_1-Q_2}{A_s}}.\]</div>
+
+<h2>6. Downstream penstock dynamics</h2>
+<div class="eq">\[L_2\dot Q_2=gA_2\left(h_s-H_t-h_{f,2}(Q_2)\right),\]</div>
+<p>with</p>
+<div class="eq">\[h_{f,2}(Q_2)=K_2Q_2|Q_2|.\]</div>
+<p>Hence</p>
+<div class="eq">\[\boxed{\dot Q_2=\frac{gA_2}{L_2}\left(h_s-H_t-K_2Q_2|Q_2|\right)}.\]</div>
+<p>The hydraulic state vector is therefore</p>
+<div class="eq">\[x_h=\begin{bmatrix}Q_1 & h_s & Q_2\end{bmatrix}^{T}.\]</div>
+
+<h2>7. Turbine algebraic model</h2>
+<p>A simple nonlinear guide-vane/flow relation is</p>
+<div class="eq">\[Q_2=C_dA_g(y_g)\sqrt{2gH_t}.\]</div>
+<p>Equivalently,</p>
+<div class="eq">\[\boxed{0=Q_2-C_dA_g(y_g)\sqrt{2gH_t}}.\]</div>
+<p>The hydraulic power and mechanical power are</p>
+<div class="eq">\[P_h=\rho gQ_2H_t,\]</div>
+<div class="eq">\[\boxed{P_m=\eta_t(Q_2,H_t,\omega)\rho gQ_2H_t}.\]</div>
+<p>The turbine torque is</p>
+<div class="eq">\[\boxed{T_m=\frac{P_m}{\omega}}.\]</div>
+
+<h2>8. Shaft and rotor dynamics</h2>
+<p>The rotor-angle equation is</p>
+<div class="eq">\[\boxed{\dot\delta=\omega-\omega_s}.\]</div>
+<p>The rotational momentum balance is</p>
+<div class="eq">\[J\dot\omega=T_m-T_e-D(\omega-\omega_s).\]</div>
+<p>In power form,</p>
+<div class="eq">\[\boxed{M\dot{\Delta\omega}=P_m-P_e-D\Delta\omega},\qquad \Delta\omega=\omega-\omega_s.\]</div>
+<p>The mechanical state vector is</p>
+<div class="eq">\[x_m=\begin{bmatrix}\delta & \omega\end{bmatrix}^{T}.\]</div>
+
+<h2>9. Generator algebraic model</h2>
+<p>If electromagnetic transients are neglected, a classical power-angle relation is</p>
+<div class="eq">\[\boxed{P_e=\frac{EV}{X}\sin\delta}.\]</div>
+<p>Equivalently,</p>
+<div class="eq">\[0=P_e-\frac{EV}{X}\sin\delta.\]</div>
+<p>The electromagnetic torque is</p>
+<div class="eq">\[T_e=\frac{P_e}{\omega}.\]</div>
+
+<h2>10. Load and power balance</h2>
+<p>A static voltage- and frequency-dependent load can be written as</p>
+<div class="eq">\[P_L=P_{L0}\left(\frac{V}{V_0}\right)^\alpha\left(\frac{\omega}{\omega_0}\right)^\beta.\]</div>
+<p>For a single-bus representation, active-power balance is</p>
+<div class="eq">\[\boxed{0=P_e-P_L-P_{\mathrm{grid}}}.\]</div>
+
+<h2>11. Complete nonlinear DAE</h2>
+<p>The differential equations are summarized by</p>
+<div class="eq">\[\boxed{\dot x=f(x,z,u,\theta)},\]</div>
+<p>and the algebraic equations by</p>
+<div class="eq">\[\boxed{0=g(x,z,u,\theta)}.\]</div>
+<p>The complete system is therefore</p>
+<div class="eq">\[\boxed{F(\dot x,x,z,u,\theta)=0}.\]</div>
+
+<h2>12. Explicit differential subsystem</h2>
+<div class="eq">\[\dot x=\begin{bmatrix}
+\dfrac{gA_1}{L_1}\left(H_r-h_s-K_1Q_1|Q_1|\right)\\[2mm]
+\dfrac{Q_1-Q_2}{A_s}\\[2mm]
+\dfrac{gA_2}{L_2}\left(h_s-H_t-K_2Q_2|Q_2|\right)\\[2mm]
+\omega-\omega_s\\[2mm]
+\dfrac{1}{J}\left(T_m-T_e-D(\omega-\omega_s)\right)
+\end{bmatrix}.\]</div>
+
+<h2>13. Algebraic subsystem</h2>
+<div class="eq">\[0=Q_2-C_dA_g(y_g)\sqrt{2gH_t},\]</div>
+<div class="eq">\[0=P_h-\rho gQ_2H_t,\]</div>
+<div class="eq">\[0=P_m-\eta_t\rho gQ_2H_t,\]</div>
+<div class="eq">\[0=T_m-\frac{P_m}{\omega},\]</div>
+<div class="eq">\[0=P_e-\frac{EV}{X}\sin\delta,\]</div>
+<div class="eq">\[0=P_L-P_{L0}\left(\frac{V}{V_0}\right)^\alpha\left(\frac{\omega}{\omega_0}\right)^\beta,\]</div>
+<div class="eq">\[0=P_e-P_L-P_{\mathrm{grid}}.\]</div>
+<p>The exact number of algebraic equations depends on the selected turbine, generator, network, and load detail.</p>
+
+<h2>14. Why this formulation is acausal</h2>
+<p>For a hydraulic connection, conservation and compatibility give</p>
+<div class="eq">\[Q_1+Q_2=0,\qquad H_1=H_2.\]</div>
+<p>For a rotational mechanical connection,</p>
+<div class="eq">\[\tau_1+\tau_2=0,\qquad \omega_1=\omega_2.\]</div>
+<p>For an electrical connection,</p>
+<div class="eq">\[i_1+i_2=0,\qquad v_1=v_2.\]</div>
+<p>These equations do not prescribe a fixed input-output direction. The distinction is</p>
+<div class="eq">\[\text{causal: } y=\phi(u),\qquad \text{acausal: }F(y,u)=0.\]</div>
+
+<h2>15. Controller equations are conceptually separate</h2>
+<p>An isochronous PI governor may be written as</p>
+<div class="eq">\[\dot\xi=\omega_{\mathrm{ref}}-\omega,\]</div>
+<div class="eq">\[y_g=K_p(\omega_{\mathrm{ref}}-\omega)+K_i\xi.\]</div>
+<p>Droop control may be written as</p>
+<div class="eq">\[\Delta P_{\mathrm{ref}}=-\frac{1}{R}\Delta\omega.\]</div>
+<p>These equations can be coupled to the nonlinear DAE without changing the meaning of physical acausality.</p>
+
+<h2>16. Equilibrium operating point</h2>
+<p>Let \((x^\star,z^\star,u^\star)\) be an operating point. It must satisfy</p>
+<div class="eq">\[\boxed{f(x^\star,z^\star,u^\star,\theta)=0},\]</div>
+<div class="eq">\[\boxed{g(x^\star,z^\star,u^\star,\theta)=0}.\]</div>
+<p>At equilibrium,</p>
+<div class="eq">\[\dot Q_1=\dot h_s=\dot Q_2=\dot\delta=\dot\omega=0.\]</div>
+
+<h2>17. Linearization of the DAE</h2>
+<p>Define perturbations</p>
+<div class="eq">\[\Delta x=x-x^\star,\qquad \Delta z=z-z^\star,\qquad \Delta u=u-u^\star.\]</div>
+<p>The first-order model is</p>
+<div class="eq">\[\Delta\dot x=A_x\Delta x+A_z\Delta z+B\Delta u,\]</div>
+<div class="eq">\[0=G_x\Delta x+G_z\Delta z+G_u\Delta u.\]</div>
+<p>If \(G_z\) is nonsingular,</p>
+<div class="eq">\[\Delta z=-G_z^{-1}G_x\Delta x-G_z^{-1}G_u\Delta u.\]</div>
+<p>Substitution gives the reduced state-space model</p>
+<div class="eq">\[\boxed{\Delta\dot x=A\Delta x+B_r\Delta u}.\]</div>
+
+<h2>18. Connection to FCR and LFC</h2>
+<p>The primary-control path is</p>
+<div class="eq">\[\Delta\omega\rightarrow\text{governor}\rightarrow\Delta y_g\rightarrow\text{hydraulic system}\rightarrow\Delta P_m\rightarrow\text{shaft/generator}\rightarrow\Delta\omega.\]</div>
+<p>A useful transfer function is</p>
+<div class="eq">\[\boxed{G_{P_m\omega}(s)=\frac{\Delta P_m(s)}{\Delta\omega(s)}}.\]</div>
+<p>Another useful plant transfer function is</p>
+<div class="eq">\[G_{P_my_g}(s)=\frac{\Delta P_m(s)}{\Delta y_g(s)}.\]</div>
+
+<h2>19. Equation count</h2>
+<p>For this simplified model,</p>
+<div class="eq">\[\boxed{3\text{ hydraulic differential equations}+2\text{ mechanical differential equations}=5\text{ differential states}}.\]</div>
+<p>The number of algebraic equations is model-dependent and should not be fixed until the turbine, electrical network, load, and generator detail are fully specified.</p>
+
+<h2>20. Final model</h2>
+<div class="eq">\[\boxed{\begin{aligned}\dot x&=f(x,z,u,\theta),\\0&=g(x,z,u,\theta).\end{aligned}}\]</div>
+<div class="note"><strong>Next step.</strong> Starting from an equilibrium \((x^\star,z^\star,u^\star)\), we can derive the Jacobians analytically, eliminate the algebraic perturbations, and obtain a reduced linear model for governor, droop, FCR, and AGC studies.</div>
+</main>
+</body>
+</html>
