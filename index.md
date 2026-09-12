@@ -1,35 +1,62 @@
 ---
 layout: default
-title: Hydropower Dynamics and Frequency Control
+title: OpenHPL Hydropower Control Notes
 ---
 
-# Hydropower Dynamics and Frequency Control
+# OpenHPL Hydropower Control Notes
 
-These notes develop a nonlinear hydropower model from physical equations and connect it to frequency-control theory, acausal modeling, digital control, AGC, and numerical methods.
+This site develops hydropower frequency-control models directly from the OpenHPL library used by USN/OpenSimHub. The workflow starts from the nonlinear acausal Modelica plant, derives reduced control models around an operating point, and connects them to FCR/LFC analysis in Julia.
 
 ## Complete article series
 
-1. [Nonlinear Hydropower DAE Model](articles/01-hydropower-dae-model.html)
-2. [Acausal Modeling of Hydropower Systems](articles/02-acausal-modeling.html)
-3. [Governor and Droop Control](articles/03-governor-droop-control.html)
-4. [Primary and Secondary Frequency Control](articles/04-primary-secondary-control.html)
-5. [Continuous Physics and Discrete Control](articles/05-continuous-discrete-control.html)
-6. [Homotopy and DAE Events](articles/06-homotopy-dae-events.html)
+1. [OpenHPL-Based Nonlinear Hydropower DAE](articles/01-hydropower-dae-model.html)
+2. [Acausal Modeling and OpenHPL Interfaces](articles/02-acausal-modeling.html)
+3. [Hydraulic Dynamics: Reservoir, PenstockKP and Surge Tank](articles/03-governor-droop-control.html)
+4. [Francis Turbine: Hydraulic-to-Mechanical Coupling](articles/04-primary-secondary-control.html)
+5. [OpenHPL Generator and Grid Coupling](articles/05-continuous-discrete-control.html)
+6. [OpenHPL Governor, Droop and Guide-Vane Servo](articles/06-homotopy-dae-events.html)
+7. [Building the Complete OpenHPL FCR Loop](articles/07-openhpl-fcr-loop.html)
+8. [Operating Point, DAE Linearization and Model Reduction](articles/08-operating-point-linearization.html)
+9. [Continuous Physics, Digital Events and Homotopy](articles/09-hybrid-events-homotopy.html)
+10. [From OpenHPL to Julia and ControlSystems.jl](articles/10-julia-control-workflow.html)
+11. [OpenHPL Source Map Used in These Notes](articles/11-openhpl-source-map.html)
 
-## Mathematical roadmap
-
-The series starts from the nonlinear physical model
-
-$$
-F(\dot{x},x,z,u,\theta)=0,
-$$
-
-then separates physical causality from controller execution, develops droop/FCR and AGC, and finally treats hybrid events and consistent DAE reinitialization.
-
-The next stage will derive equilibrium conditions, linearize the nonlinear DAE,
+## Central mathematical path
 
 $$
-E\,\Delta\dot X=A\,\Delta X+B\,\Delta u,
+F(\dot{x},x,z,u,\theta)=0
 $$
 
-reduce it to state-space form where possible, and derive transfer functions for classical LFC/FCR analysis.
+$$
+\Downarrow
+$$
+
+$$
+F(0,x^\star,z^\star,u^\star,\theta)=0
+$$
+
+$$
+\Downarrow
+$$
+
+$$
+E\,\Delta\dot{x}=A\,\Delta x+B\,\Delta u
+$$
+
+$$
+\Downarrow
+$$
+
+$$
+G(s)=C(sE-A)^{-1}B+D
+$$
+
+$$
+\Downarrow
+$$
+
+$$
+\text{FCR / LFC analysis and controller design}
+$$
+
+The detailed OpenHPL model remains the nonlinear reference model; reduced transfer functions are derived for analysis and must be validated back against the nonlinear plant.
