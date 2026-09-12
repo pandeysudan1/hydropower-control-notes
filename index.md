@@ -9,7 +9,7 @@ These notes develop a nonlinear hydropower model from physical equations and con
 
 ## Articles
 
-1. [Nonlinear Hydropower DAE Model](articles/01-hydropower-dae-model.md)
+1. [Nonlinear Hydropower DAE Model](articles/01-hydropower-dae-model.html)
 2. Acausal Modeling of Hydropower Systems
 3. Governor and Droop Control
 4. Primary and Secondary Frequency Control
